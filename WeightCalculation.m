@@ -1,6 +1,7 @@
 %This script is used for data process and weight calculation
 clear all;
 WeightMatrix=xlsread("WeightMatrix.xlsx");
+WeightMatrix=WeightMatrix.';
 isError=0;
 n=11;
 for i=1:n
