@@ -30,14 +30,25 @@
 
 %%%
 %META info area
-numAttr=11;
-numCountry=6;
-numYear=13;
 
 %%%
 clear xlsRead;
 
-xlsRes=xlsread("Data/TestData1.xlsx");
+xlsRes=xlsread("Data/20CountryFull.xlsx");
+%GDP=xlsread("Data/GDP.xlsx");
+
+
+AveGen;
+for year=1:numYear
+    for country=1:numCountry
+        for attr=1:numAttr
+            if(isnan(xlsRes(attr+(country-1)*numAttr,year))==1)
+                xlsRes(attr+(country-1)*numAttr,year)=averageMatrix(attr,year);
+            end
+        end
+    end
+end
+
 totalInternationalStudents=zeros(numYear,1);
 totalGovExpenditure=zeros(numYear,1);
 totalPublishedPaper=zeros(numYear,1);
@@ -45,6 +56,9 @@ totalLabourRatio=zeros(numYear,1);
 totalResearcher=zeros(numYear,1);
 totalArtRatio=zeros(numYear,1);
 totalGraduationRatio=zeros(numYear,1);
+totalGDP=zeros(numCountry,1);
+maxFunding=0;
+maxUnemploymentRatio=0;
 for year=1:numYear
     for country=1:numCountry
         totalInternationalStudents(year)=totalInternationalStudents(year)+xlsRes(1+(country-1)*numAttr,year);
@@ -54,22 +68,32 @@ for year=1:numYear
         totalResearcher(year)=totalResearcher(year)+xlsRes(8+(country-1)*numAttr,year);
         totalArtRatio(year)=totalArtRatio(year)+xlsRes(10+(country-1)*numAttr,year);
         totalGraduationRatio(year)=totalGraduationRatio(year)+xlsRes(11+(country-1)*numAttr,year);
+        if(xlsRes(2+(country-1)*numAttr,year)>maxFunding)
+            maxFunding=xlsRes(2+(country-1)*numAttr,year);
+        end
+        if(xlsRes(9+(country-1)*numAttr,year)>maxUnemploymentRatio)
+            maxUnemploymentRatio=xlsRes(9+(country-1)*numAttr,year);
+        end
+        %totalGDP(country)=totalGDP(country)+GDP(country,year);
     end
 end
 for year=1:numYear
     for country=1:numCountry
         xlsRes(1+(country-1)*numAttr,year)=xlsRes(1+(country-1)*numAttr,year)/totalInternationalStudents(year)*numCountry;
         xlsRes(2+(country-1)*numAttr,year)=1/xlsRes(2+(country-1)*numAttr,year);
+        %xlsRes(2+(country-1)*numAttr,year)=(maxFunding-xlsRes(2+(country-1)*numAttr,year))/100;
         if(xlsRes(3+(country-1)*numAttr,year)>=0.5)
-            xlsRes(3+(country-1)*numAttr,year)=2*xlsRes(3+(country-1)*numAttr,year);
+            xlsRes(3+(country-1)*numAttr,year)=2*xlsRes(3+(country-1)*numAttr,year)/100;
         else
-            xlsRes(3+(country-1)*numAttr,year)=2*(1-xlsRes(3+(country-1)*numAttr,year));
+            xlsRes(3+(country-1)*numAttr,year)=2*(1-xlsRes(3+(country-1)*numAttr,year))/100;
         end
         xlsRes(4+(country-1)*numAttr,year)=xlsRes(4+(country-1)*numAttr,year)/totalPublishedPaper(year)/xlsRes(8+(country-1)*numAttr,year)*numCountry;
         xlsRes(6+(country-1)*numAttr,year)=xlsRes(6+(country-1)*numAttr,year)/totalLabourRatio(year)*numCountry;
         xlsRes(8+(country-1)*numAttr,year)=xlsRes(8+(country-1)*numAttr,year)/totalResearcher(year)*numCountry;
         xlsRes(9+(country-1)*numAttr,year)=1/xlsRes(9+(country-1)*numAttr,year);
+        %xlsRes(9+(country-1)*numAttr,year)=(maxUnemploymentRatio-xlsRes(9+(country-1)*numAttr,year))/100;
         xlsRes(10+(country-1)*numAttr,year)=xlsRes(10+(country-1)*numAttr,year)/totalArtRatio(year)*numCountry;
         xlsRes(11+(country-1)*numAttr,year)=xlsRes(11+(country-1)*numAttr,year)/totalGraduationRatio(year)*numCountry;
+        %GDP(country,year)=GDP(country,year)/totalGDP(country)*numYear;
     end
 end
